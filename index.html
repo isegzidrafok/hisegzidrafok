@@ -1,468 +1,269 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>İsegzidrafok</title>
 <style>
-  /* Temel stil ve koyu tema */
-  :root {
-    --background-dark: #000000;
-    --background-light: #f0f0f0;
-    --chat-bg-dark: #333333;
-    --chat-bg-light: #ddd;
-    --text-dark-red: #8B0000;
-    --text-black: #000;
-  }
-  body {
-    margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: var(--background-dark);
-    color: var(--text-dark-red);
-    height: 100vh;
-    display: flex;
-    flex-direction: column;
-  }
-  #app {
-    flex: 1 1 auto;
-    display: flex;
-    flex-direction: column;
-    max-width: 480px;
-    margin: 0 auto;
-    height: 100vh;
-  }
-  header {
-    padding: 16px;
-    text-align: center;
-    font-weight: 700;
-    font-size: 1.6em;
-    color: var(--text-dark-red);
-    border-bottom: 1px solid #222;
-  }
-  main {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    background: var(--background-dark);
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-  }
-  button {
-    background: var(--chat-bg-dark);
-    border: none;
-    color: var(--text-dark-red);
-    padding: 12px 20px;
-    margin: 6px 0;
-    border-radius: 10px;
-    font-size: 1.1em;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-  }
-  button:hover {
-    background: #4b0000;
-  }
-  /* Ana Sayfa ve Liste Elemanları */
-  .list-item {
-    background: var(--chat-bg-dark);
-    margin: 8px 0;
-    padding: 12px 16px;
-    border-radius: 12px;
-    cursor: pointer;
-  }
-  .list-item:hover {
-    background: #4b0000;
-  }
-  /* Sohbet ekranı */
-  #chat-messages {
-    flex: 1 1 auto;
-    overflow-y: auto;
-    margin-bottom: 12px;
-  }
-  .message {
-    background: var(--chat-bg-dark);
-    border-radius: 12px;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    color: var(--text-dark-red);
-    font-size: 1em;
-    word-wrap: break-word;
-    max-width: 80%;
-  }
-  .message .time {
-    display: block;
-    font-size: 0.75em;
-    color: #b33a3a;
-    margin-top: 4px;
-    text-align: right;
-    user-select: none;
-  }
-  #message-input {
-    width: calc(100% - 90px);
-    padding: 10px 12px;
-    border-radius: 12px;
-    border: none;
-    font-size: 1em;
-    background: var(--chat-bg-dark);
-    color: var(--text-dark-red);
-    outline: none;
-  }
-  #send-btn {
-    width: 70px;
-    border-radius: 12px;
-    border: none;
-    background: #660000;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-  }
-  #send-btn:disabled {
-    background: #330000;
-    cursor: default;
-  }
-  /* Mesaj giriş alanı */
-  #input-area {
-    display: flex;
-    gap: 10px;
-  }
-  /* Ayarlar sayfası */
-  label {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 1.1em;
-    margin: 12px 0;
-    color: var(--text-dark-red);
-  }
-  input[type="checkbox"] {
-    width: 20px; height: 20px;
-  }
-  #admin-panel {
-    margin-top: 20px;
-    padding-top: 12px;
-    border-top: 1px solid #4b0000;
-  }
-  .admin-button {
-    background: #8B0000;
-    border-radius: 10px;
-    padding: 10px 14px;
-    margin: 6px 0;
-    font-size: 1em;
-    color: white;
-    cursor: pointer;
-  }
-  .admin-button:hover {
-    background: #b33a3a;
-  }
-  /* Scroll bar özelleştirme */
-  main::-webkit-scrollbar, #chat-messages::-webkit-scrollbar {
-    width: 8px;
-  }
-  main::-webkit-scrollbar-thumb, #chat-messages::-webkit-scrollbar-thumb {
-    background-color: #660000;
-    border-radius: 8px;
-  }
-  /* Responsive telefon için */
-  @media (max-width: 600px) {
-    #app {
-      width: 100vw;
-      height: 100vh;
-      max-width: none;
+    body {
+        background: black;
+        color: navy;
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding: 10px;
     }
-    #message-input {
-      font-size: 1.1em;
+    h1 {
+        margin-bottom: 15px;
     }
-    button, .admin-button {
-      font-size: 1.1em;
+    input, button, select {
+        display: block;
+        margin: 8px auto;
+        padding: 8px;
+        border-radius: 5px;
+        border: none;
     }
-  }
-  /* Açık tema için */
-  body.light-theme {
-    background: var(--background-light);
-    color: var(--text-black);
-  }
-  body.light-theme header {
-    color: var(--text-black);
-    border-bottom: 1px solid #aaa;
-  }
-  body.light-theme button, body.light-theme .list-item, body.light-theme .message, body.light-theme #message-input {
-    background: var(--chat-bg-light);
-    color: var(--text-black);
-  }
-  body.light-theme button:hover, body.light-theme .list-item:hover, body.light-theme .admin-button:hover {
-    background: #aaa;
-  }
-  body.light-theme .message .time {
-    color: #555;
-  }
+    input, select {
+        width: 80%;
+        background: #111;
+        color: white;
+    }
+    button {
+        background: #222;
+        color: navy;
+        cursor: pointer;
+    }
+    button:hover {
+        background: #333;
+    }
+    .hidden { display: none; }
+    .chat-box {
+        background: #111;
+        padding: 10px;
+        margin: 10px auto;
+        width: 90%;
+        height: 300px;
+        overflow-y: auto;
+        border: 1px solid navy;
+        color: white;
+        text-align: left;
+    }
+    .msg {
+        margin: 5px 0;
+        padding: 5px;
+        border-bottom: 1px solid #333;
+    }
+    .username {
+        font-weight: bold;
+        color: cyan;
+    }
 </style>
 </head>
 <body>
-<div id="app">
-  <header>İsegzidrafok</header>
-  <main id="main-content">
-    <!-- Ana sayfa -->
-    <div id="home-screen">
-      <button id="btn-new-chat">Sohbet Oluştur</button>
-      <div id="chat-list"></div>
-      <button id="btn-settings">Ayarlar</button>
-    </div>
 
-    <!-- Sohbet ekranı -->
-    <div id="chat-screen" style="display:none; flex-direction: column; height: 100%;">
-      <div id="chat-messages"></div>
-      <div id="input-area">
-        <input type="text" id="message-input" placeholder="Mesaj yaz..." autocomplete="off" />
-        <button id="send-btn" disabled>Gönder</button>
-      </div>
-      <button id="btn-back-home" style="margin-top:10px; background:#4b0000;">Geri</button>
-    </div>
+<h1>İsegzidrafok</h1>
 
-    <!-- Ayarlar ekranı -->
-    <div id="settings-screen" style="display:none;">
-      <label>
-        <input type="checkbox" id="theme-toggle" />
-        Açık Tema Kullan
-      </label>
-      <button id="btn-clear-chats" style="background:#660000; color:#fff; border-radius:10px; padding:10px 14px; margin-top:12px;">Tüm Sohbetleri Sil</button>
+<!-- Ana Giriş Menüsü -->
+<div id="mainMenu">
+    <button onclick="showRegister()">Yeni Hesap Oluştur</button>
+    <button onclick="showLogin()">Hesaba Giriş Yap</button>
+    <button onclick="adminLogin()">Yönetici Girişi</button>
+</div>
 
-      <div style="margin-top:20px;">
-        <button id="btn-admin-login" class="admin-button">Yönetici Modu</button>
-      </div>
+<!-- Yeni Hesap -->
+<div id="registerSection" class="hidden">
+    <h2>Yeni Hesap Oluştur</h2>
+    <input type="text" id="regName" placeholder="İsim (Değiştirilemez)">
+    <input type="password" id="regPass" placeholder="Şifre">
+    <button onclick="registerUser()">Kaydol</button>
+    <button onclick="goBack()">Geri</button>
+</div>
 
-      <button id="btn-back-home-from-settings" style="margin-top:20px; background:#4b0000;">Geri</button>
-    </div>
+<!-- Giriş -->
+<div id="loginSection" class="hidden">
+    <h2>Hesaba Giriş Yap</h2>
+    <input type="text" id="loginName" placeholder="İsim">
+    <input type="password" id="loginPass" placeholder="Şifre">
+    <button onclick="loginUser()">Giriş Yap</button>
+    <button onclick="goBack()">Geri</button>
+</div>
 
-    <!-- Yönetici paneli -->
-    <div id="admin-panel" style="display:none;">
-      <h3 style="color:#8B0000;">Yönetici Paneli</h3>
-      <div id="admin-chat-list"></div>
-      <button id="btn-admin-logout" class="admin-button" style="background:#4b0000;">Çıkış Yap</button>
-    </div>
+<!-- Yönetici Paneli -->
+<div id="adminSection" class="hidden">
+    <h2>Yönetici Paneli</h2>
+    <h3>Bekleyen Kayıt Talepleri</h3>
+    <div id="pendingUsers"></div>
+    <h3>Engelleme Talepleri</h3>
+    <div id="blockRequests"></div>
+    <button onclick="goBack()">Çıkış</button>
+</div>
 
-  </main>
+<!-- Kullanıcı Ana Menü -->
+<div id="userMenu" class="hidden">
+    <h2>Hoş geldin, <span id="currentUserName"></span></h2>
+    <button onclick="openSettings()">Ayarlar</button>
+    <button onclick="openPrivateChat()">Birisiyle Sohbet Oluştur</button>
+    <button onclick="openGroupChat()">Toplu Grup</button>
+    <button onclick="logout()">Çıkış</button>
+</div>
+
+<!-- Ayarlar -->
+<div id="settingsSection" class="hidden">
+    <h2>Ayarlar</h2>
+    <input type="password" id="newPass" placeholder="Yeni Şifre">
+    <button onclick="changePassword()">Şifreyi Değiştir</button>
+    <button onclick="backToMenu()">Geri</button>
+</div>
+
+<!-- Özel Sohbet -->
+<div id="privateChatSection" class="hidden">
+    <h2>Özel Sohbet</h2>
+    <input type="text" id="friendName" placeholder="Arkadaşının İsmi">
+    <button onclick="startPrivateChat()">Sohbete Başla</button>
+    <div id="privateChatBox" class="chat-box"></div>
+    <input type="text" id="privateMsg" placeholder="Mesaj yaz...">
+    <button onclick="sendPrivateMsg()">Gönder</button>
+    <button onclick="backToMenu()">Geri</button>
+</div>
+
+<!-- Grup Sohbet -->
+<div id="groupChatSection" class="hidden">
+    <h2>Toplu Grup</h2>
+    <div id="groupChatBox" class="chat-box"></div>
+    <input type="text" id="groupMsg" placeholder="Mesaj yaz...">
+    <button onclick="sendGroupMsg()">Gönder</button>
+    <button onclick="backToMenu()">Geri</button>
 </div>
 
 <script>
-  (() => {
-    const LS_CHATS_KEY = 'isegzidrafok_chats';
-    const LS_THEME_KEY = 'isegzidrafok_theme';
-    let chats = [];
-    let currentChatId = null;
-    let isAdmin = false;
+let users = JSON.parse(localStorage.getItem("users") || "[]");
+let pending = JSON.parse(localStorage.getItem("pending") || "[]");
+let blocks = JSON.parse(localStorage.getItem("blocks") || "[]");
+let groupChat = JSON.parse(localStorage.getItem("groupChat") || "[]");
+let currentUser = null;
+let privateChats = JSON.parse(localStorage.getItem("privateChats") || "{}");
 
-    // Elementler
-    const homeScreen = document.getElementById('home-screen');
-    const chatScreen = document.getElementById('chat-screen');
-    const settingsScreen = document.getElementById('settings-screen');
-    const adminPanel = document.getElementById('admin-panel');
-    const chatListDiv = document.getElementById('chat-list');
-    const adminChatListDiv = document.getElementById('admin-chat-list');
-    const messageInput = document.getElementById('message-input');
-    const sendBtn = document.getElementById('send-btn');
-    const chatMessagesDiv = document.getElementById('chat-messages');
-    const themeToggle = document.getElementById('theme-toggle');
+function saveAll() {
+    localStorage.setItem("users", JSON.stringify(users));
+    localStorage.setItem("pending", JSON.stringify(pending));
+    localStorage.setItem("blocks", JSON.stringify(blocks));
+    localStorage.setItem("groupChat", JSON.stringify(groupChat));
+    localStorage.setItem("privateChats", JSON.stringify(privateChats));
+}
 
-    // Yardımcı fonksiyonlar
-    function saveChats() {
-      localStorage.setItem(LS_CHATS_KEY, JSON.stringify(chats));
-    }
-    function loadChats() {
-      const saved = localStorage.getItem(LS_CHATS_KEY);
-      if (saved) {
-        chats = JSON.parse(saved);
-      } else {
-        chats = [];
-      }
-    }
-    function saveTheme(theme) {
-      localStorage.setItem(LS_THEME_KEY, theme);
-    }
-    function loadTheme() {
-      const t = localStorage.getItem(LS_THEME_KEY);
-      if (t === 'light') {
-        document.body.classList.add('light-theme');
-        themeToggle.checked = true;
-      } else {
-        document.body.classList.remove('light-theme');
-        themeToggle.checked = false;
-      }
-    }
-    function formatDate(dateStr) {
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('tr-TR') + ' ' + d.toLocaleTimeString('tr-TR', {hour: '2-digit', minute:'2-digit'});
-    }
-    function createMessageElement(message) {
-      const div = document.createElement('div');
-      div.className = 'message';
-      div.textContent = message.text;
-      const timeSpan = document.createElement('span');
-      timeSpan.className = 'time';
-      timeSpan.textContent = formatDate(message.timestamp);
-      div.appendChild(timeSpan);
-      return div;
-    }
-    function renderChatList() {
-      chatListDiv.innerHTML = '';
-      if (chats.length === 0) {
-        chatListDiv.textContent = 'Henüz sohbet yok.';
-        return;
-      }
-      chats.forEach(chat => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        div.textContent = chat.title;
-        div.onclick = () => openChat(chat.id);
-        chatListDiv.appendChild(div);
-      });
-    }
-    function renderAdminChatList() {
-      adminChatListDiv.innerHTML = '';
-      if (chats.length === 0) {
-        adminChatListDiv.textContent = 'Henüz sohbet yok.';
-        return;
-      }
-      chats.forEach(chat => {
-        const div = document.createElement('div');
-        div.className = 'list-item';
-        div.textContent = `${chat.title} (${chat.messages.length} mesaj)`;
-        div.onclick = () => openAdminChat(chat.id);
-        adminChatListDiv.appendChild(div);
-      });
-    }
-    function openChat(id) {
-      currentChatId = id;
-      showScreen('chat');
-      messageInput.value = '';
-      sendBtn.disabled = true;
-      renderMessages();
-      scrollToBottom();
-    }
-    function renderMessages() {
-      chatMessagesDiv.innerHTML = '';
-      const chat = chats.find(c => c.id === currentChatId);
-      if (!chat) return;
-      chat.messages.forEach(msg => {
-        chatMessagesDiv.appendChild(createMessageElement(msg));
-      });
-    }
-    function scrollToBottom() {
-      setTimeout(() => {
-        chatMessagesDiv.scrollTop = chatMessagesDiv.scrollHeight;
-      }, 50);
-    }
-    function showScreen(screen) {
-      homeScreen.style.display = screen === 'home' ? 'block' : 'none';
-      chatScreen.style.display = screen === 'chat' ? 'flex' : 'none';
-      settingsScreen.style.display = screen === 'settings' ? 'block' : 'none';
-      adminPanel.style.display = screen === 'admin' ? 'block' : 'none';
-    }
-    function createNewChat() {
-      const newId = 'chat-' + Date.now();
-      const newChat = {
-        id: newId,
-        title: 'Sohbet ' + (chats.length + 1),
-        messages: []
-      };
-      chats.push(newChat);
-      saveChats();
-      renderChatList();
-      openChat(newId);
-    }
-    function sendMessage() {
-      const text = messageInput.value.trim();
-      if (!text) return;
-      const chat = chats.find(c => c.id === currentChatId);
-      if (!chat) return;
-      const msg = { text, timestamp: new Date().toISOString() };
-      chat.messages.push(msg);
-      saveChats();
-      renderMessages();
-      scrollToBottom();
-      messageInput.value = '';
-      sendBtn.disabled = true;
-    }
-    function clearAllChats() {
-      if (confirm('Tüm sohbetler silinecek. Emin misin?')) {
-        chats = [];
-        saveChats();
-        renderChatList();
-        alert('Tüm sohbetler silindi.');
-      }
-    }
-    function adminLogin() {
-      const pwd = prompt('Yönetici şifresini giriniz:');
-      if (pwd === 'Natrium1126621924') {
-        isAdmin = true;
-        showScreen('admin');
-        renderAdminChatList();
-      } else {
-        alert('Şifre yanlış!');
-      }
-    }
-    function adminLogout() {
-      isAdmin = false;
-      showScreen('home');
-    }
-    // Admin chat açma ve düzenleme
-    function openAdminChat(id) {
-      const chat = chats.find(c => c.id === id);
-      if (!chat) return;
-      const newTitle = prompt('Sohbet başlığını düzenle:', chat.title);
-      if (newTitle === null) return; // iptal
-      chat.title = newTitle.trim() || chat.title;
-      // Mesaj düzenleme/silme:
-      let msgIndex = 0;
-      while (msgIndex < chat.messages.length) {
-        const msg = chat.messages[msgIndex];
-        const action = prompt(`Mesajı düzenle veya sil:\n"${msg.text}"\n\nSilmek için "sil", düzenlemek için yeni metni yaz, iptal için boş bırak:`);
-        if (action === null || action === '') {
-          msgIndex++;
-          continue;
-        }
-        if (action.toLowerCase() === 'sil') {
-          chat.messages.splice(msgIndex,1);
-          // msgIndex değişmeden devam
-        } else {
-          msg.text = action;
-          msgIndex++;
-        }
-      }
-      saveChats();
-      renderAdminChatList();
-      alert('Sohbet güncellendi.');
-    }
-    // Tema değiştirme
-    function toggleTheme() {
-      if (themeToggle.checked) {
-        document.body.classList.add('light-theme');
-        saveTheme('light');
-      } else {
-        document.body.classList.remove('light-theme');
-        saveTheme('dark');
-      }
-    }
+function showRegister(){ document.getElementById("mainMenu").classList.add("hidden"); document.getElementById("registerSection").classList.remove("hidden"); }
+function showLogin(){ document.getElementById("mainMenu").classList.add("hidden"); document.getElementById("loginSection").classList.remove("hidden"); }
+function goBack(){
+    document.querySelectorAll("div").forEach(d => d.classList.add("hidden"));
+    document.getElementById("mainMenu").classList.remove("hidden");
+}
+function backToMenu(){
+    document.querySelectorAll("div").forEach(d => d.classList.add("hidden"));
+    document.getElementById("userMenu").classList.remove("hidden");
+}
 
-    // Event Listeners
-    document.getElementById('btn-new-chat').onclick = createNewChat;
-    document.getElementById('btn-settings').onclick = () => showScreen('settings');
-    document.getElementById('btn-back-home').onclick = () => showScreen('home');
-    document.getElementById('btn-back-home-from-settings').onclick = () => showScreen('home');
-    sendBtn.onclick = sendMessage;
-    messageInput.addEventListener('input', () => {
-      sendBtn.disabled = messageInput.value.trim() === '';
+function registerUser(){
+    let name = document.getElementById("regName").value.trim();
+    let pass = document.getElementById("regPass").value.trim();
+    if(!name || !pass){ alert("İsim ve şifre gir!"); return; }
+    if(users.find(u=>u.name===name) || pending.find(u=>u.name===name)){ alert("İsim alınmış!"); return; }
+    pending.push({name,pass});
+    saveAll();
+    alert("Kayıt isteği gönderildi. Yönetici onayı bekleniyor.");
+    goBack();
+}
+
+function loginUser(){
+    let name = document.getElementById("loginName").value.trim();
+    let pass = document.getElementById("loginPass").value.trim();
+    let user = users.find(u=>u.name===name && u.pass===pass);
+    if(user){
+        currentUser = user;
+        document.getElementById("currentUserName").innerText = currentUser.name;
+        backToMenu();
+    } else {
+        alert("Giriş başarısız. Onaylanmamış olabilir.");
+    }
+}
+
+function adminLogin(){
+    let pw = prompt("Yönetici şifresi:");
+    if(pw==="Natrium1126621924"){
+        document.getElementById("mainMenu").classList.add("hidden");
+        document.getElementById("adminSection").classList.remove("hidden");
+        renderPending();
+    } else { alert("Yanlış şifre!"); }
+}
+
+function renderPending(){
+    let pDiv=document.getElementById("pendingUsers");
+    pDiv.innerHTML="";
+    if(pending.length===0){ pDiv.innerHTML="<p>Bekleyen kayıt yok</p>"; return; }
+    pending.forEach((p,i)=>{
+        pDiv.innerHTML+=`${p.name} <button onclick="approveUser(${i})">Onayla</button> <button onclick="rejectUser(${i})">Reddet</button><br>`;
     });
-    document.getElementById('btn-clear-chats').onclick = clearAllChats;
-    document.getElementById('btn-admin-login').onclick = adminLogin;
-    document.getElementById('btn-admin-logout').onclick = adminLogout;
-    themeToggle.onchange = toggleTheme;
+}
 
-    // Başlangıç
-    loadChats();
-    loadTheme();
-    renderChatList();
-    showScreen('home');
+function approveUser(i){ users.push(pending[i]); pending.splice(i,1); saveAll(); renderPending(); }
+function rejectUser(i){ pending.splice(i,1); saveAll(); renderPending(); }
 
-  })();
+function openSettings(){
+    document.getElementById("userMenu").classList.add("hidden");
+    document.getElementById("settingsSection").classList.remove("hidden");
+}
+function changePassword(){
+    let newPass=document.getElementById("newPass").value.trim();
+    if(!newPass){ alert("Yeni şifre gir!"); return; }
+    currentUser.pass=newPass;
+    users=users.map(u=>u.name===currentUser.name?currentUser:u);
+    saveAll();
+    alert("Şifre değişti!");
+}
+function openPrivateChat(){
+    document.getElementById("userMenu").classList.add("hidden");
+    document.getElementById("privateChatSection").classList.remove("hidden");
+}
+function startPrivateChat(){
+    let fname=document.getElementById("friendName").value.trim();
+    if(!fname){ alert("Arkadaş ismi gir!"); return; }
+    let key=[currentUser.name,fname].sort().join("_");
+    if(!privateChats[key]) privateChats[key]=[];
+    renderPrivateChat(key);
+}
+function renderPrivateChat(key){
+    let box=document.getElementById("privateChatBox");
+    box.innerHTML="";
+    privateChats[key].forEach(m=>{ box.innerHTML+=`<div class="msg"><span class="username">${m.user}:</span> ${m.text}</div>`; });
+}
+function sendPrivateMsg(){
+    let fname=document.getElementById("friendName").value.trim();
+    let key=[currentUser.name,fname].sort().join("_");
+    let msg=document.getElementById("privateMsg").value.trim();
+    if(!msg)return;
+    privateChats[key].push({user:currentUser.name,text:msg});
+    saveAll();
+    renderPrivateChat(key);
+    document.getElementById("privateMsg").value="";
+}
+function openGroupChat(){
+    document.getElementById("userMenu").classList.add("hidden");
+    document.getElementById("groupChatSection").classList.remove("hidden");
+    renderGroupChat();
+}
+function renderGroupChat(){
+    let box=document.getElementById("groupChatBox");
+    box.innerHTML="";
+    groupChat.forEach(m=>{ box.innerHTML+=`<div class="msg"><span class="username">${m.user}:</span> ${m.text}</div>`; });
+}
+function sendGroupMsg(){
+    let msg=document.getElementById("groupMsg").value.trim();
+    if(!msg)return;
+    groupChat.push({user:currentUser.name,text:msg});
+    saveAll();
+    renderGroupChat();
+    document.getElementById("groupMsg").value="";
+}
+function logout(){ currentUser=null; goBack(); }
 </script>
+
 </body>
-  </html>
-  
+</html>
