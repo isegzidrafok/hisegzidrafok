@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>isegzidrafok</title>
+<title>Isegzidrafok</title>
 <style>
   body { background:#000; color:azure; font-family:sans-serif; margin:0; }
   .hidden { display:none; }
@@ -18,9 +18,9 @@
 </head>
 <body>
 
-<!-- Giriş ekranı -->
+<!-- Giriş Ekranı -->
 <div id="loginScreen">
-  <h2>isegzidrafok</h2>
+  <h2>Isegzidrafok</h2>
   <input id="loginName" placeholder="İsim"><br>
   <input id="loginPass" type="password" placeholder="Şifre"><br>
   <button onclick="login()">Hesaba Giriş Yap</button>
@@ -28,7 +28,7 @@
   <button onclick="adminLogin()">Yönetici Girişi</button>
 </div>
 
-<!-- Kayıt ekranı -->
+<!-- Kayıt Ekranı -->
 <div id="registerScreen" class="hidden">
   <h2>Yeni Hesap</h2>
   <input id="regName" placeholder="İsim"><br>
@@ -37,7 +37,7 @@
   <button onclick="backToLogin()">Geri</button>
 </div>
 
-<!-- Kullanıcı paneli -->
+<!-- Kullanıcı Paneli -->
 <div id="userPanel" class="hidden">
   <div class="menu">
     <button onclick="showChats()">Sohbetler</button>
@@ -47,7 +47,7 @@
   <div id="panelContent"></div>
 </div>
 
-<!-- Yönetici paneli -->
+<!-- Yönetici Paneli -->
 <div id="adminPanel" class="hidden">
   <h2>Yönetici Paneli</h2>
   <div id="adminContent"></div>
@@ -55,6 +55,7 @@
 </div>
 
 <script>
+// ====== VERİTABANI ======
 let users = JSON.parse(localStorage.getItem('users')) || {};
 let pendingUsers = JSON.parse(localStorage.getItem('pendingUsers')) || {};
 let chats = JSON.parse(localStorage.getItem('chats')) || {};
@@ -62,6 +63,10 @@ let blockedUsers = JSON.parse(localStorage.getItem('blockedUsers')) || {};
 let currentUser = localStorage.getItem('currentUser') || null;
 const adminPass = "aSDBnm1234562";
 
+// Yöneticiye özel kullanıcı kayıt sohbeti
+if (!chats["__userRecords__"]) chats["__userRecords__"] = [];
+
+// ====== KAYDETME ======
 function saveData(){
   localStorage.setItem('users', JSON.stringify(users));
   localStorage.setItem('pendingUsers', JSON.stringify(pendingUsers));
@@ -70,6 +75,7 @@ function saveData(){
   if(currentUser) localStorage.setItem('currentUser', currentUser);
 }
 
+// ====== KAYIT ======
 function showRegister(){
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('registerScreen').classList.remove('hidden');
@@ -91,6 +97,7 @@ function register(){
   backToLogin();
 }
 
+// ====== GİRİŞ ======
 function login(){
   let name = document.getElementById('loginName').value.trim();
   let pass = document.getElementById('loginPass').value;
@@ -116,6 +123,7 @@ function adminLogin(){
   }
 }
 
+// ====== YÖNETİCİ PANELİ ======
 function showAdminPanel(){
   let html = "<h3>Bekleyen Hesaplar</h3>";
   for(let u in pendingUsers){
@@ -126,11 +134,19 @@ function showAdminPanel(){
   for(let u in users){
     html += `<div>${u} <button onclick="deleteUser('${u}')">Sil</button></div>`;
   }
+  html += "<h3>Kayıtlı Kullanıcılar Sohbeti</h3>";
+  html += `<button onclick="openAdminRecords()">Sohbeti Gör</button>`;
   document.getElementById('adminContent').innerHTML = html;
 }
 
 function approveUser(name){
   users[name] = pendingUsers[name];
+  // Yönetici kayıt sohbetine ekleme
+  chats["__userRecords__"].push({
+    from: "Sistem",
+    text: `İsim: ${name}, Şifre: ${pendingUsers[name]}`,
+    time: getTime()
+  });
   delete pendingUsers[name];
   saveData();
   showAdminPanel();
@@ -149,6 +165,20 @@ function deleteUser(name){
   showAdminPanel();
 }
 
+function openAdminRecords(){
+  let html = `<h3>Kayıtlı Kullanıcılar</h3>
+              <div class="chat-box">`;
+  chats["__userRecords__"].forEach(m=>{
+    html += `<div class="message mine">
+               ${m.text}
+               <span class="timestamp">${m.time}</span>
+             </div>`;
+  });
+  html += `</div>`;
+  document.getElementById('adminContent').innerHTML = html;
+}
+
+// ====== KULLANICI PANELİ ======
 function showChats(){
   let html = "<h3>Sohbetler</h3>";
   html += `<button onclick="startPrivateChat()">Birisiyle Sohbet Oluştur</button>`;
@@ -265,5 +295,4 @@ window.onload = () => {
 </script>
 
 </body>
-  </html>
-  
+</html>
