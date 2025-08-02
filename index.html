@@ -61,22 +61,22 @@ button:hover {
 }
 .message {
   max-width: 70%;
-  margin: 5px;
+  margin: 8px;
   padding: 8px;
   border-radius: 5px;
   position: relative;
-}
-.message .meta {
-  font-size: 10px;
-  position: absolute;
-  bottom: -12px;
-  right: 5px;
+  word-wrap: break-word;
 }
 .message .sender {
   font-size: 10px;
-  position: absolute;
-  top: -12px;
-  left: 5px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 3px;
+}
+.message .meta {
+  font-size: 9px;
+  text-align: right;
+  margin-top: 3px;
 }
 .own {
   background-color: #3399ff;
@@ -107,7 +107,7 @@ button:hover {
   <h3>Yeni Hesap Oluştur</h3>
   İsim: <input type="text" id="newName"><br>
   Şifre: <input type="password" id="newPass"><br>
-  <button onclick="createAccount()">Oluştur</button>
+  <button onclick="requestAccount()">Talep Gönder</button>
   <button onclick="backToLogin()">Geri</button>
 </div>
 
@@ -128,7 +128,9 @@ button:hover {
 
 <div id="adminPanel" class="container hidden">
   <h2>Yönetici Paneli</h2>
+  <h4>Bekleyen Hesap Talepleri</h4>
   <div id="pendingAccounts"></div>
+  <h4>Gelen Mesajlar</h4>
   <div id="messagesToAdmin"></div>
   <button onclick="backToLogin()">Çıkış</button>
 </div>
@@ -164,6 +166,9 @@ button:hover {
   <div id="settingsScreen" class="container hidden">
     <h3>Ayarlar</h3>
     <button onclick="toggleTheme()">Tema Değiştir (Koyu/Açık)</button>
+    <button onclick="viewBlocked()">Engellenenleri Gör</button>
+    <button onclick="clearChats()">Sohbet Geçmişini Sil</button>
+    <button onclick="sendFeedback()">Bize Ulaşın</button>
     <button onclick="logout()">Çıkış Yap</button>
   </div>
 </div>
@@ -173,15 +178,22 @@ let currentUser = null;
 let currentChat = null;
 let theme = 'dark';
 let users = JSON.parse(localStorage.getItem('users') || '{}');
+let pending = JSON.parse(localStorage.getItem('pending') || '[]');
 let chats = JSON.parse(localStorage.getItem('chats') || '{}');
 let groupMessages = JSON.parse(localStorage.getItem('groupMessages') || '[]');
+let blocked = JSON.parse(localStorage.getItem('blocked') || '{}');
+let feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
 
 function saveData() {
   localStorage.setItem('users', JSON.stringify(users));
+  localStorage.setItem('pending', JSON.stringify(pending));
   localStorage.setItem('chats', JSON.stringify(chats));
   localStorage.setItem('groupMessages', JSON.stringify(groupMessages));
+  localStorage.setItem('blocked', JSON.stringify(blocked));
+  localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
 }
 
+// Giriş ekranı
 function showCreateAccount() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('createAccountScreen').classList.remove('hidden');
@@ -198,16 +210,21 @@ function backToLogin() {
   document.querySelectorAll('.container').forEach(div => div.classList.add('hidden'));
   document.getElementById('loginScreen').classList.remove('hidden');
 }
-function createAccount() {
+
+// Hesap talebi
+function requestAccount() {
   let name = document.getElementById('newName').value;
   let pass = document.getElementById('newPass').value;
   if (!name || !pass) { alert('Boş bırakmayın'); return; }
-  if (users[name]) { alert('Bu isim zaten var'); return; }
-  users[name] = {pass: pass};
+  if (users[name] || pending.find(p=>p.name===name)) { alert('Bu isim kullanılıyor'); return; }
+  pending.push({name, pass});
+  if (pending.length>=10) alert("Spam algılandı! Yönetici kontrolü bekleniyor.");
   saveData();
-  alert('Hesap oluşturuldu');
+  alert('Hesap talebi gönderildi, yönetici onayı bekleniyor');
   backToLogin();
 }
+
+// Kullanıcı girişi
 function loginAccount() {
   let name = document.getElementById('loginName').value;
   let pass = document.getElementById('loginPass').value;
@@ -216,15 +233,47 @@ function loginAccount() {
     document.getElementById('loginAccountScreen').classList.add('hidden');
     document.getElementById('userPanel').classList.remove('hidden');
     showChats();
-  } else { alert('Hatalı giriş'); }
+  } else { alert('Onay bekleniyor veya hatalı giriş'); }
 }
+
+// Yönetici girişi
 function loginAdmin() {
   let pass = document.getElementById('adminPass').value;
   if (pass === 'aSDBnm1234562') {
     document.getElementById('adminLoginScreen').classList.add('hidden');
     document.getElementById('adminPanel').classList.remove('hidden');
+    renderAdmin();
   } else { alert('Yanlış şifre'); }
 }
+function renderAdmin() {
+  let pa = document.getElementById('pendingAccounts');
+  pa.innerHTML='';
+  pending.forEach((p,i)=>{
+    let div=document.createElement('div');
+    div.textContent=p.name;
+    let ok=document.createElement('button');
+    ok.textContent='Onayla';
+    ok.onclick=()=>{users[p.name]={pass:p.pass};pending.splice(i,1);saveData();renderAdmin();}
+    let no=document.createElement('button');
+    no.textContent='Reddet';
+    no.onclick=()=>{pending.splice(i,1);saveData();renderAdmin();}
+    div.appendChild(ok); div.appendChild(no);
+    pa.appendChild(div);
+  });
+  let msg=document.getElementById('messagesToAdmin');
+  msg.innerHTML='';
+  feedbacks.forEach((f,i)=>{
+    let div=document.createElement('div');
+    div.textContent=f;
+    let btn=document.createElement('button');
+    btn.textContent='Tamam';
+    btn.onclick=()=>{feedbacks.splice(i,1);saveData();renderAdmin();}
+    div.appendChild(btn);
+    msg.appendChild(div);
+  });
+}
+
+// Sohbetler
 function showChats() {
   document.getElementById('chatListScreen').classList.remove('hidden');
   document.getElementById('chatWindowScreen').classList.add('hidden');
@@ -279,6 +328,8 @@ function sendMessage() {
   document.getElementById('chatMessage').value = '';
   renderChat();
 }
+
+// Grup
 function showGroup() {
   document.getElementById('chatListScreen').classList.add('hidden');
   document.getElementById('chatWindowScreen').classList.add('hidden');
@@ -305,15 +356,13 @@ function sendGroupMessage() {
   document.getElementById('groupMessage').value = '';
   renderGroup();
 }
+
+// Ayarlar
 function showSettings() {
   document.getElementById('chatListScreen').classList.add('hidden');
   document.getElementById('chatWindowScreen').classList.add('hidden');
   document.getElementById('groupChatScreen').classList.add('hidden');
   document.getElementById('settingsScreen').classList.remove('hidden');
-}
-function logout() {
-  currentUser = null;
-  backToLogin();
 }
 function toggleTheme() {
   if (theme === 'dark') {
@@ -326,11 +375,29 @@ function toggleTheme() {
     theme = 'dark';
   }
 }
+function viewBlocked() {
+  alert("Engellenenler: " + (blocked[currentUser]||[]).join(", ") || "Yok");
+}
+function clearChats() {
+  chats[currentUser] = {};
+  saveData();
+  alert("Sohbetler silindi");
+}
+function sendFeedback() {
+  let msg=prompt("Yönetime iletmek istediğiniz mesaj:");
+  if (msg) {feedbacks.push(msg); if(feedbacks.length>=10) alert("Spam algılandı!"); saveData();}
+}
+function logout() {
+  currentUser = null;
+  backToLogin();
+}
+
+// Tarih
 function formatDate() {
   let d = new Date();
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}/${String(d.getHours()).padStart(2,'0')}/${String(d.getMinutes()).padStart(2,'0')}`;
 }
 </script>
 </body>
-      </html>
-    
+  </html>
+    list.innerHTML
