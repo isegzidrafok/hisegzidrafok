@@ -190,20 +190,26 @@ button:hover {
 <div id="contextMenu" class="context-menu"></div>
 
 <script>
+// Güvenli veri yükleme
+function loadData(key, defaultValue) {
+  try {
+    let data = localStorage.getItem(key);
+    return data ? JSON.parse(data) : defaultValue;
+  } catch {
+    return defaultValue;
+  }
+}
+
 let currentUser = null;
 let currentChat = null;
 let theme = 'dark';
 
-// Kullanıcı verilerini güvenle yükle
-let users;
-try { users = JSON.parse(localStorage.getItem('users')) || {}; }
-catch(e) { users = {}; }
-
-let pending = JSON.parse(localStorage.getItem('pending') || '[]');
-let chats = JSON.parse(localStorage.getItem('chats') || '{}');
-let groupMessages = JSON.parse(localStorage.getItem('groupMessages') || '[]');
-let blocked = JSON.parse(localStorage.getItem('blocked') || '{}');
-let feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+let users = loadData('users', {});
+let pending = loadData('pending', []);
+let chats = loadData('chats', {});
+let groupMessages = loadData('groupMessages', []);
+let blocked = loadData('blocked', {});
+let feedbacks = loadData('feedbacks', []);
 
 function saveData() {
   localStorage.setItem('users', JSON.stringify(users));
@@ -271,10 +277,19 @@ function renderAdmin() {
     div.textContent=p.name;
     let ok=document.createElement('button');
     ok.textContent='Onayla';
-    ok.onclick=()=>{users[p.name]={pass:p.pass};pending.splice(i,1);saveData();renderAdmin();}
+    ok.onclick=()=>{
+      users[p.name]={pass:p.pass};
+      pending.splice(i,1);
+      saveData();
+      renderAdmin();
+    };
     let no=document.createElement('button');
     no.textContent='Reddet';
-    no.onclick=()=>{pending.splice(i,1);saveData();renderAdmin();}
+    no.onclick=()=>{
+      pending.splice(i,1);
+      saveData();
+      renderAdmin();
+    };
     div.appendChild(ok); div.appendChild(no);
     pa.appendChild(div);
   });
@@ -286,7 +301,11 @@ function renderAdmin() {
     div.textContent=name;
     let del=document.createElement('button');
     del.textContent='Sil';
-    del.onclick=()=>{delete users[name]; saveData(); renderAdmin();}
+    del.onclick=()=>{
+      delete users[name];
+      saveData();
+      renderAdmin();
+    };
     div.appendChild(del);
     au.appendChild(div);
   });
@@ -298,7 +317,11 @@ function renderAdmin() {
     div.textContent=f;
     let btn=document.createElement('button');
     btn.textContent='Tamam';
-    btn.onclick=()=>{feedbacks.splice(i,1);saveData();renderAdmin();}
+    btn.onclick=()=>{
+      feedbacks.splice(i,1);
+      saveData();
+      renderAdmin();
+    };
     div.appendChild(btn);
     msg.appendChild(div);
   });
@@ -453,7 +476,7 @@ function toggleTheme() {
   }
 }
 function viewBlocked() {
-  alert("Engellenenler: " + (blocked[currentUser]||[]).join(", ") || "Yok");
+  alert("Engellenenler: " + ((blocked[currentUser]||[]).join(", ") || "Yok"));
 }
 function clearChats() {
   chats[currentUser] = {};
@@ -475,20 +498,9 @@ function formatDate() {
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}/${String(d.getHours()).padStart(2,'0')}/${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
-// Sayfa yenilenince kullanıcıyı hatırla
 window.onload = () => {
   let savedUser = localStorage.getItem('currentUser');
   if (savedUser && users[savedUser]) {
     currentUser = savedUser;
-    document.getElementById('loginScreen').classList.add('hidden');
-    document.getElementById('userPanel').classList.remove('hidden');
-    showChats();
-  } else {
-    backToLogin();
-  }
-}
-</script>
-
-</body>
-                                                         </html>
-  
+    document.getElementBy
+      
