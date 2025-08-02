@@ -92,6 +92,18 @@ button:hover {
   display: flex;
   flex-direction: column;
 }
+.context-menu {
+  position: absolute;
+  background: #222;
+  border: 1px solid #555;
+  display: none;
+  z-index: 1000;
+}
+.context-menu button {
+  display: block;
+  width: 100%;
+  text-align: left;
+}
 </style>
 </head>
 <body>
@@ -130,6 +142,8 @@ button:hover {
   <h2>Yönetici Paneli</h2>
   <h4>Bekleyen Hesap Talepleri</h4>
   <div id="pendingAccounts"></div>
+  <h4>Kullanıcılar</h4>
+  <div id="allUsers"></div>
   <h4>Gelen Mesajlar</h4>
   <div id="messagesToAdmin"></div>
   <button onclick="backToLogin()">Çıkış</button>
@@ -173,6 +187,8 @@ button:hover {
   </div>
 </div>
 
+<div id="contextMenu" class="context-menu"></div>
+
 <script>
 let currentUser = null;
 let currentChat = null;
@@ -193,7 +209,6 @@ function saveData() {
   localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
 }
 
-// Giriş ekranı
 function showCreateAccount() {
   document.getElementById('loginScreen').classList.add('hidden');
   document.getElementById('createAccountScreen').classList.remove('hidden');
@@ -211,32 +226,29 @@ function backToLogin() {
   document.getElementById('loginScreen').classList.remove('hidden');
 }
 
-// Hesap talebi
 function requestAccount() {
   let name = document.getElementById('newName').value;
   let pass = document.getElementById('newPass').value;
   if (!name || !pass) { alert('Boş bırakmayın'); return; }
   if (users[name] || pending.find(p=>p.name===name)) { alert('Bu isim kullanılıyor'); return; }
   pending.push({name, pass});
-  if (pending.length>=10) alert("Spam algılandı! Yönetici kontrolü bekleniyor.");
   saveData();
-  alert('Hesap talebi gönderildi, yönetici onayı bekleniyor');
+  alert('Hesap talebi gönderildi');
   backToLogin();
 }
 
-// Kullanıcı girişi
 function loginAccount() {
   let name = document.getElementById('loginName').value;
   let pass = document.getElementById('loginPass').value;
   if (users[name] && users[name].pass === pass) {
     currentUser = name;
+    localStorage.setItem('currentUser', currentUser);
     document.getElementById('loginAccountScreen').classList.add('hidden');
     document.getElementById('userPanel').classList.remove('hidden');
     showChats();
-  } else { alert('Onay bekleniyor veya hatalı giriş'); }
+  } else { alert('Hatalı giriş veya onay bekleniyor'); }
 }
 
-// Yönetici girişi
 function loginAdmin() {
   let pass = document.getElementById('adminPass').value;
   if (pass === 'aSDBnm1234562') {
@@ -245,6 +257,7 @@ function loginAdmin() {
     renderAdmin();
   } else { alert('Yanlış şifre'); }
 }
+
 function renderAdmin() {
   let pa = document.getElementById('pendingAccounts');
   pa.innerHTML='';
@@ -260,6 +273,19 @@ function renderAdmin() {
     div.appendChild(ok); div.appendChild(no);
     pa.appendChild(div);
   });
+
+  let au = document.getElementById('allUsers');
+  au.innerHTML='';
+  Object.keys(users).forEach(name=>{
+    let div=document.createElement('div');
+    div.textContent=name;
+    let del=document.createElement('button');
+    del.textContent='Sil';
+    del.onclick=()=>{delete users[name]; saveData(); renderAdmin();}
+    div.appendChild(del);
+    au.appendChild(div);
+  });
+
   let msg=document.getElementById('messagesToAdmin');
   msg.innerHTML='';
   feedbacks.forEach((f,i)=>{
@@ -273,7 +299,6 @@ function renderAdmin() {
   });
 }
 
-// Sohbetler
 function showChats() {
   document.getElementById('chatListScreen').classList.remove('hidden');
   document.getElementById('chatWindowScreen').classList.add('hidden');
@@ -290,6 +315,7 @@ function showChats() {
     });
   }
 }
+
 function createChat() {
   let friend = document.getElementById('newChatName').value;
   if (!friend) return;
@@ -300,6 +326,7 @@ function createChat() {
   saveData();
   showChats();
 }
+
 function openChat(friend) {
   currentChat = friend;
   document.getElementById('chatTitle').textContent = friend;
@@ -307,6 +334,7 @@ function openChat(friend) {
   document.getElementById('chatWindowScreen').classList.remove('hidden');
   renderChat();
 }
+
 function renderChat() {
   let win = document.getElementById('chatWindow');
   win.innerHTML = '';
@@ -318,6 +346,7 @@ function renderChat() {
     win.appendChild(div);
   });
 }
+
 function sendMessage() {
   let txt = document.getElementById('chatMessage').value;
   if (!txt) return;
@@ -329,7 +358,6 @@ function sendMessage() {
   renderChat();
 }
 
-// Grup
 function showGroup() {
   document.getElementById('chatListScreen').classList.add('hidden');
   document.getElementById('chatWindowScreen').classList.add('hidden');
@@ -337,16 +365,19 @@ function showGroup() {
   document.getElementById('settingsScreen').classList.add('hidden');
   renderGroup();
 }
+
 function renderGroup() {
   let win = document.getElementById('groupWindow');
   win.innerHTML = '';
-  groupMessages.forEach(m => {
+  groupMessages.forEach((m, idx) => {
     let div = document.createElement('div');
     div.classList.add('message', m.sender === currentUser ? 'own' : 'other');
     div.innerHTML = `<div class="sender">${m.sender}</div>${m.text}<div class="meta">${m.time}</div>`;
+    div.oncontextmenu = (e) => showContextMenu(e, m.sender);
     win.appendChild(div);
   });
 }
+
 function sendGroupMessage() {
   let txt = document.getElementById('groupMessage').value;
   if (!txt) return;
@@ -357,13 +388,54 @@ function sendGroupMessage() {
   renderGroup();
 }
 
-// Ayarlar
+function showContextMenu(e, sender) {
+  e.preventDefault();
+  let menu = document.getElementById('contextMenu');
+  menu.innerHTML = '';
+  let chatBtn = document.createElement('button');
+  chatBtn.textContent = sender + " ile sohbet et";
+  chatBtn.onclick = () => { createChatWith(sender); menu.style.display='none'; };
+  menu.appendChild(chatBtn);
+  let blockBtn = document.createElement('button');
+  if (blocked[currentUser]?.includes(sender)) {
+    blockBtn.textContent = sender + " engelini kaldır";
+    blockBtn.onclick = () => { unblockUser(sender); menu.style.display='none'; };
+  } else {
+    blockBtn.textContent = sender + " engelle";
+    blockBtn.onclick = () => { blockUser(sender); menu.style.display='none'; };
+  }
+  menu.appendChild(blockBtn);
+  menu.style.left = e.pageX + 'px';
+  menu.style.top = e.pageY + 'px';
+  menu.style.display = 'block';
+}
+document.body.addEventListener('click', ()=>document.getElementById('contextMenu').style.display='none');
+
+function createChatWith(user) {
+  document.getElementById('newChatName').value = user;
+  createChat();
+  openChat(user);
+}
+
+function blockUser(user) {
+  if (!blocked[currentUser]) blocked[currentUser] = [];
+  blocked[currentUser].push(user);
+  saveData();
+  alert(user + " engellendi");
+}
+function unblockUser(user) {
+  blocked[currentUser] = blocked[currentUser].filter(u=>u!==user);
+  saveData();
+  alert(user + " engeli kaldırıldı");
+}
+
 function showSettings() {
   document.getElementById('chatListScreen').classList.add('hidden');
   document.getElementById('chatWindowScreen').classList.add('hidden');
   document.getElementById('groupChatScreen').classList.add('hidden');
   document.getElementById('settingsScreen').classList.remove('hidden');
 }
+
 function toggleTheme() {
   if (theme === 'dark') {
     document.body.style.backgroundColor = '#fff';
@@ -385,19 +457,30 @@ function clearChats() {
 }
 function sendFeedback() {
   let msg=prompt("Yönetime iletmek istediğiniz mesaj:");
-  if (msg) {feedbacks.push(msg); if(feedbacks.length>=10) alert("Spam algılandı!"); saveData();}
+  if (msg) {feedbacks.push(msg); saveData();}
 }
 function logout() {
   currentUser = null;
+  localStorage.removeItem('currentUser');
   backToLogin();
 }
 
-// Tarih
 function formatDate() {
   let d = new Date();
   return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}/${String(d.getHours()).padStart(2,'0')}/${String(d.getMinutes()).padStart(2,'0')}`;
 }
+
+window.onload = () => {
+  let savedUser = localStorage.getItem('currentUser');
+  if (savedUser && users[savedUser]) {
+    currentUser = savedUser;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('userPanel').classList.remove('hidden');
+    showChats();
+  }
+}
 </script>
+
 </body>
-  </html>
-    list.innerHTML
+           </html>
+  
