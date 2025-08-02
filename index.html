@@ -146,7 +146,7 @@ button:hover {
   <div id="allUsers"></div>
   <h4>Gelen Mesajlar</h4>
   <div id="messagesToAdmin"></div>
-  <button onclick="backToLogin()">Çıkış</button>
+  <button onclick="logout()">Çıkış</button>
 </div>
 
 <div id="userPanel" class="container hidden">
@@ -190,10 +190,10 @@ button:hover {
 <div id="contextMenu" class="context-menu"></div>
 
 <script>
-// Güvenli veri yükleme
+// Verileri güvenli şekilde yükle
 function loadData(key, defaultValue) {
   try {
-    let data = localStorage.getItem(key);
+    const data = localStorage.getItem(key);
     return data ? JSON.parse(data) : defaultValue;
   } catch {
     return defaultValue;
@@ -397,7 +397,7 @@ function showGroup() {
 function renderGroup() {
   let win = document.getElementById('groupWindow');
   win.innerHTML = '';
-  groupMessages.forEach((m, idx) => {
+  groupMessages.forEach(m => {
     let div = document.createElement('div');
     div.classList.add('message', m.sender === currentUser ? 'own' : 'other');
     div.innerHTML = `<div class="sender">${m.sender}</div>${m.text}<div class="meta">${m.time}</div>`;
@@ -495,12 +495,21 @@ function logout() {
 
 function formatDate() {
   let d = new Date();
-  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}/${String(d.getHours()).padStart(2,'0')}/${String(d.getMinutes()).padStart(2,'0')}`;
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
 }
 
+// Sayfa yüklenince önceki oturumu aç
 window.onload = () => {
   let savedUser = localStorage.getItem('currentUser');
   if (savedUser && users[savedUser]) {
     currentUser = savedUser;
-    document.getElementBy
-      
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('userPanel').classList.remove('hidden');
+    showChats();
+  }
+};
+</script>
+
+</body>
+      </html>
+  
