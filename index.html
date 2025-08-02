@@ -3,267 +3,334 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>İsegzidrafok</title>
+<title>Isegzidrafok</title>
 <style>
-    body {
-        background: black;
-        color: navy;
-        font-family: Arial, sans-serif;
-        text-align: center;
-        padding: 10px;
-    }
-    h1 {
-        margin-bottom: 15px;
-    }
-    input, button, select {
-        display: block;
-        margin: 8px auto;
-        padding: 8px;
-        border-radius: 5px;
-        border: none;
-    }
-    input, select {
-        width: 80%;
-        background: #111;
-        color: white;
-    }
-    button {
-        background: #222;
-        color: navy;
-        cursor: pointer;
-    }
-    button:hover {
-        background: #333;
-    }
-    .hidden { display: none; }
-    .chat-box {
-        background: #111;
-        padding: 10px;
-        margin: 10px auto;
-        width: 90%;
-        height: 300px;
-        overflow-y: auto;
-        border: 1px solid navy;
-        color: white;
-        text-align: left;
-    }
-    .msg {
-        margin: 5px 0;
-        padding: 5px;
-        border-bottom: 1px solid #333;
-    }
-    .username {
-        font-weight: bold;
-        color: cyan;
-    }
+body {
+  font-family: Arial, sans-serif;
+  background-color: #000;
+  color: azure;
+  margin: 0;
+  padding: 0;
+}
+.hidden { display: none; }
+button {
+  background-color: #222;
+  color: azure;
+  border: none;
+  padding: 10px;
+  margin: 5px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #444;
+}
+.container {
+  padding: 15px;
+}
+.menu {
+  display: flex;
+  justify-content: space-around;
+  background-color: #111;
+  padding: 10px 0;
+  position: sticky;
+  top: 0;
+}
+.chat-list, .chat-window {
+  border: 1px solid #444;
+  margin-top: 10px;
+  padding: 10px;
+  height: 300px;
+  overflow-y: auto;
+  background-color: #111;
+}
+.message-input {
+  display: flex;
+  position: sticky;
+  bottom: 0;
+  background-color: #111;
+}
+.message-input input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  background-color: #222;
+  color: azure;
+}
+.message-input button {
+  padding: 10px;
+}
+.message {
+  max-width: 70%;
+  margin: 5px;
+  padding: 8px;
+  border-radius: 5px;
+  position: relative;
+}
+.message .meta {
+  font-size: 10px;
+  position: absolute;
+  bottom: -12px;
+  right: 5px;
+}
+.message .sender {
+  font-size: 10px;
+  position: absolute;
+  top: -12px;
+  left: 5px;
+}
+.own {
+  background-color: #3399ff;
+  color: black;
+  align-self: flex-end;
+}
+.other {
+  background-color: #555;
+  color: azure;
+  align-self: flex-start;
+}
+.chat-window {
+  display: flex;
+  flex-direction: column;
+}
 </style>
 </head>
 <body>
 
-<h1>İsegzidrafok</h1>
-
-<!-- Ana Giriş Menüsü -->
-<div id="mainMenu">
-    <button onclick="showRegister()">Yeni Hesap Oluştur</button>
-    <button onclick="showLogin()">Hesaba Giriş Yap</button>
-    <button onclick="adminLogin()">Yönetici Girişi</button>
+<div id="loginScreen" class="container">
+  <h2>Isegzidrafok</h2>
+  <button onclick="showCreateAccount()">Yeni Hesap Oluştur</button>
+  <button onclick="showLogin()">Hesaba Giriş Yap</button>
+  <button onclick="showAdminLogin()">Yönetici Girişi</button>
 </div>
 
-<!-- Yeni Hesap -->
-<div id="registerSection" class="hidden">
-    <h2>Yeni Hesap Oluştur</h2>
-    <input type="text" id="regName" placeholder="İsim (Değiştirilemez)">
-    <input type="password" id="regPass" placeholder="Şifre">
-    <button onclick="registerUser()">Kaydol</button>
-    <button onclick="goBack()">Geri</button>
+<div id="createAccountScreen" class="container hidden">
+  <h3>Yeni Hesap Oluştur</h3>
+  İsim: <input type="text" id="newName"><br>
+  Şifre: <input type="password" id="newPass"><br>
+  <button onclick="createAccount()">Oluştur</button>
+  <button onclick="backToLogin()">Geri</button>
 </div>
 
-<!-- Giriş -->
-<div id="loginSection" class="hidden">
-    <h2>Hesaba Giriş Yap</h2>
-    <input type="text" id="loginName" placeholder="İsim">
-    <input type="password" id="loginPass" placeholder="Şifre">
-    <button onclick="loginUser()">Giriş Yap</button>
-    <button onclick="goBack()">Geri</button>
+<div id="loginAccountScreen" class="container hidden">
+  <h3>Hesaba Giriş</h3>
+  İsim: <input type="text" id="loginName"><br>
+  Şifre: <input type="password" id="loginPass"><br>
+  <button onclick="loginAccount()">Giriş</button>
+  <button onclick="backToLogin()">Geri</button>
 </div>
 
-<!-- Yönetici Paneli -->
-<div id="adminSection" class="hidden">
-    <h2>Yönetici Paneli</h2>
-    <h3>Bekleyen Kayıt Talepleri</h3>
-    <div id="pendingUsers"></div>
-    <h3>Engelleme Talepleri</h3>
-    <div id="blockRequests"></div>
-    <button onclick="goBack()">Çıkış</button>
+<div id="adminLoginScreen" class="container hidden">
+  <h3>Yönetici Girişi</h3>
+  Şifre: <input type="password" id="adminPass"><br>
+  <button onclick="loginAdmin()">Giriş</button>
+  <button onclick="backToLogin()">Geri</button>
 </div>
 
-<!-- Kullanıcı Ana Menü -->
-<div id="userMenu" class="hidden">
-    <h2>Hoş geldin, <span id="currentUserName"></span></h2>
-    <button onclick="openSettings()">Ayarlar</button>
-    <button onclick="openPrivateChat()">Birisiyle Sohbet Oluştur</button>
-    <button onclick="openGroupChat()">Toplu Grup</button>
-    <button onclick="logout()">Çıkış</button>
+<div id="adminPanel" class="container hidden">
+  <h2>Yönetici Paneli</h2>
+  <div id="pendingAccounts"></div>
+  <div id="messagesToAdmin"></div>
+  <button onclick="backToLogin()">Çıkış</button>
 </div>
 
-<!-- Ayarlar -->
-<div id="settingsSection" class="hidden">
-    <h2>Ayarlar</h2>
-    <input type="password" id="newPass" placeholder="Yeni Şifre">
-    <button onclick="changePassword()">Şifreyi Değiştir</button>
-    <button onclick="backToMenu()">Geri</button>
-</div>
-
-<!-- Özel Sohbet -->
-<div id="privateChatSection" class="hidden">
-    <h2>Özel Sohbet</h2>
-    <input type="text" id="friendName" placeholder="Arkadaşının İsmi">
-    <button onclick="startPrivateChat()">Sohbete Başla</button>
-    <div id="privateChatBox" class="chat-box"></div>
-    <input type="text" id="privateMsg" placeholder="Mesaj yaz...">
-    <button onclick="sendPrivateMsg()">Gönder</button>
-    <button onclick="backToMenu()">Geri</button>
-</div>
-
-<!-- Grup Sohbet -->
-<div id="groupChatSection" class="hidden">
-    <h2>Toplu Grup</h2>
-    <div id="groupChatBox" class="chat-box"></div>
-    <input type="text" id="groupMsg" placeholder="Mesaj yaz...">
-    <button onclick="sendGroupMsg()">Gönder</button>
-    <button onclick="backToMenu()">Geri</button>
+<div id="userPanel" class="container hidden">
+  <div class="menu">
+    <button onclick="showChats()">Sohbetler</button>
+    <button onclick="showGroup()">Grup Sohbeti</button>
+    <button onclick="showSettings()">Ayarlar</button>
+  </div>
+  <div id="chatListScreen" class="container">
+    <h3>Sohbetler</h3>
+    <div id="chatList" class="chat-list"></div>
+    <input type="text" id="newChatName" placeholder="Yeni sohbet ismi">
+    <button onclick="createChat()">Oluştur</button>
+  </div>
+  <div id="chatWindowScreen" class="container hidden">
+    <h3 id="chatTitle"></h3>
+    <div id="chatWindow" class="chat-window"></div>
+    <div class="message-input">
+      <input type="text" id="chatMessage" placeholder="Mesaj yaz...">
+      <button onclick="sendMessage()">Gönder</button>
+    </div>
+  </div>
+  <div id="groupChatScreen" class="container hidden">
+    <h3>Grup Sohbeti</h3>
+    <div id="groupWindow" class="chat-window"></div>
+    <div class="message-input">
+      <input type="text" id="groupMessage" placeholder="Mesaj yaz...">
+      <button onclick="sendGroupMessage()">Gönder</button>
+    </div>
+  </div>
+  <div id="settingsScreen" class="container hidden">
+    <h3>Ayarlar</h3>
+    <button onclick="toggleTheme()">Tema Değiştir (Koyu/Açık)</button>
+    <button onclick="logout()">Çıkış Yap</button>
+  </div>
 </div>
 
 <script>
-let users = JSON.parse(localStorage.getItem("users") || "[]");
-let pending = JSON.parse(localStorage.getItem("pending") || "[]");
-let blocks = JSON.parse(localStorage.getItem("blocks") || "[]");
-let groupChat = JSON.parse(localStorage.getItem("groupChat") || "[]");
 let currentUser = null;
-let privateChats = JSON.parse(localStorage.getItem("privateChats") || "{}");
+let currentChat = null;
+let theme = 'dark';
+let users = JSON.parse(localStorage.getItem('users') || '{}');
+let chats = JSON.parse(localStorage.getItem('chats') || '{}');
+let groupMessages = JSON.parse(localStorage.getItem('groupMessages') || '[]');
 
-function saveAll() {
-    localStorage.setItem("users", JSON.stringify(users));
-    localStorage.setItem("pending", JSON.stringify(pending));
-    localStorage.setItem("blocks", JSON.stringify(blocks));
-    localStorage.setItem("groupChat", JSON.stringify(groupChat));
-    localStorage.setItem("privateChats", JSON.stringify(privateChats));
+function saveData() {
+  localStorage.setItem('users', JSON.stringify(users));
+  localStorage.setItem('chats', JSON.stringify(chats));
+  localStorage.setItem('groupMessages', JSON.stringify(groupMessages));
 }
 
-function showRegister(){ document.getElementById("mainMenu").classList.add("hidden"); document.getElementById("registerSection").classList.remove("hidden"); }
-function showLogin(){ document.getElementById("mainMenu").classList.add("hidden"); document.getElementById("loginSection").classList.remove("hidden"); }
-function goBack(){
-    document.querySelectorAll("div").forEach(d => d.classList.add("hidden"));
-    document.getElementById("mainMenu").classList.remove("hidden");
+function showCreateAccount() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('createAccountScreen').classList.remove('hidden');
 }
-function backToMenu(){
-    document.querySelectorAll("div").forEach(d => d.classList.add("hidden"));
-    document.getElementById("userMenu").classList.remove("hidden");
+function showLogin() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('loginAccountScreen').classList.remove('hidden');
 }
-
-function registerUser(){
-    let name = document.getElementById("regName").value.trim();
-    let pass = document.getElementById("regPass").value.trim();
-    if(!name || !pass){ alert("İsim ve şifre gir!"); return; }
-    if(users.find(u=>u.name===name) || pending.find(u=>u.name===name)){ alert("İsim alınmış!"); return; }
-    pending.push({name,pass});
-    saveAll();
-    alert("Kayıt isteği gönderildi. Yönetici onayı bekleniyor.");
-    goBack();
+function showAdminLogin() {
+  document.getElementById('loginScreen').classList.add('hidden');
+  document.getElementById('adminLoginScreen').classList.remove('hidden');
 }
-
-function loginUser(){
-    let name = document.getElementById("loginName").value.trim();
-    let pass = document.getElementById("loginPass").value.trim();
-    let user = users.find(u=>u.name===name && u.pass===pass);
-    if(user){
-        currentUser = user;
-        document.getElementById("currentUserName").innerText = currentUser.name;
-        backToMenu();
-    } else {
-        alert("Giriş başarısız. Onaylanmamış olabilir.");
-    }
+function backToLogin() {
+  document.querySelectorAll('.container').forEach(div => div.classList.add('hidden'));
+  document.getElementById('loginScreen').classList.remove('hidden');
 }
-
-function adminLogin(){
-    let pw = prompt("Yönetici şifresi:");
-    if(pw==="Natrium1126621924"){
-        document.getElementById("mainMenu").classList.add("hidden");
-        document.getElementById("adminSection").classList.remove("hidden");
-        renderPending();
-    } else { alert("Yanlış şifre!"); }
+function createAccount() {
+  let name = document.getElementById('newName').value;
+  let pass = document.getElementById('newPass').value;
+  if (!name || !pass) { alert('Boş bırakmayın'); return; }
+  if (users[name]) { alert('Bu isim zaten var'); return; }
+  users[name] = {pass: pass};
+  saveData();
+  alert('Hesap oluşturuldu');
+  backToLogin();
 }
-
-function renderPending(){
-    let pDiv=document.getElementById("pendingUsers");
-    pDiv.innerHTML="";
-    if(pending.length===0){ pDiv.innerHTML="<p>Bekleyen kayıt yok</p>"; return; }
-    pending.forEach((p,i)=>{
-        pDiv.innerHTML+=`${p.name} <button onclick="approveUser(${i})">Onayla</button> <button onclick="rejectUser(${i})">Reddet</button><br>`;
+function loginAccount() {
+  let name = document.getElementById('loginName').value;
+  let pass = document.getElementById('loginPass').value;
+  if (users[name] && users[name].pass === pass) {
+    currentUser = name;
+    document.getElementById('loginAccountScreen').classList.add('hidden');
+    document.getElementById('userPanel').classList.remove('hidden');
+    showChats();
+  } else { alert('Hatalı giriş'); }
+}
+function loginAdmin() {
+  let pass = document.getElementById('adminPass').value;
+  if (pass === 'aSDBnm1234562') {
+    document.getElementById('adminLoginScreen').classList.add('hidden');
+    document.getElementById('adminPanel').classList.remove('hidden');
+  } else { alert('Yanlış şifre'); }
+}
+function showChats() {
+  document.getElementById('chatListScreen').classList.remove('hidden');
+  document.getElementById('chatWindowScreen').classList.add('hidden');
+  document.getElementById('groupChatScreen').classList.add('hidden');
+  document.getElementById('settingsScreen').classList.add('hidden');
+  let list = document.getElementById('chatList');
+  list.innerHTML = '';
+  if (chats[currentUser]) {
+    Object.keys(chats[currentUser]).forEach(friend => {
+      let btn = document.createElement('button');
+      btn.textContent = friend;
+      btn.onclick = () => openChat(friend);
+      list.appendChild(btn);
     });
+  }
 }
-
-function approveUser(i){ users.push(pending[i]); pending.splice(i,1); saveAll(); renderPending(); }
-function rejectUser(i){ pending.splice(i,1); saveAll(); renderPending(); }
-
-function openSettings(){
-    document.getElementById("userMenu").classList.add("hidden");
-    document.getElementById("settingsSection").classList.remove("hidden");
+function createChat() {
+  let friend = document.getElementById('newChatName').value;
+  if (!friend) return;
+  if (!chats[currentUser]) chats[currentUser] = {};
+  if (!chats[friend]) chats[friend] = {};
+  chats[currentUser][friend] = chats[currentUser][friend] || [];
+  chats[friend][currentUser] = chats[friend][currentUser] || [];
+  saveData();
+  showChats();
 }
-function changePassword(){
-    let newPass=document.getElementById("newPass").value.trim();
-    if(!newPass){ alert("Yeni şifre gir!"); return; }
-    currentUser.pass=newPass;
-    users=users.map(u=>u.name===currentUser.name?currentUser:u);
-    saveAll();
-    alert("Şifre değişti!");
+function openChat(friend) {
+  currentChat = friend;
+  document.getElementById('chatTitle').textContent = friend;
+  document.getElementById('chatListScreen').classList.add('hidden');
+  document.getElementById('chatWindowScreen').classList.remove('hidden');
+  renderChat();
 }
-function openPrivateChat(){
-    document.getElementById("userMenu").classList.add("hidden");
-    document.getElementById("privateChatSection").classList.remove("hidden");
+function renderChat() {
+  let win = document.getElementById('chatWindow');
+  win.innerHTML = '';
+  let msgs = chats[currentUser][currentChat] || [];
+  msgs.forEach(m => {
+    let div = document.createElement('div');
+    div.classList.add('message', m.sender === currentUser ? 'own' : 'other');
+    div.innerHTML = `<div class="sender">${m.sender}</div>${m.text}<div class="meta">${m.time}</div>`;
+    win.appendChild(div);
+  });
 }
-function startPrivateChat(){
-    let fname=document.getElementById("friendName").value.trim();
-    if(!fname){ alert("Arkadaş ismi gir!"); return; }
-    let key=[currentUser.name,fname].sort().join("_");
-    if(!privateChats[key]) privateChats[key]=[];
-    renderPrivateChat(key);
+function sendMessage() {
+  let txt = document.getElementById('chatMessage').value;
+  if (!txt) return;
+  let time = formatDate();
+  chats[currentUser][currentChat].push({sender: currentUser, text: txt, time});
+  chats[currentChat][currentUser].push({sender: currentUser, text: txt, time});
+  saveData();
+  document.getElementById('chatMessage').value = '';
+  renderChat();
 }
-function renderPrivateChat(key){
-    let box=document.getElementById("privateChatBox");
-    box.innerHTML="";
-    privateChats[key].forEach(m=>{ box.innerHTML+=`<div class="msg"><span class="username">${m.user}:</span> ${m.text}</div>`; });
+function showGroup() {
+  document.getElementById('chatListScreen').classList.add('hidden');
+  document.getElementById('chatWindowScreen').classList.add('hidden');
+  document.getElementById('groupChatScreen').classList.remove('hidden');
+  document.getElementById('settingsScreen').classList.add('hidden');
+  renderGroup();
 }
-function sendPrivateMsg(){
-    let fname=document.getElementById("friendName").value.trim();
-    let key=[currentUser.name,fname].sort().join("_");
-    let msg=document.getElementById("privateMsg").value.trim();
-    if(!msg)return;
-    privateChats[key].push({user:currentUser.name,text:msg});
-    saveAll();
-    renderPrivateChat(key);
-    document.getElementById("privateMsg").value="";
+function renderGroup() {
+  let win = document.getElementById('groupWindow');
+  win.innerHTML = '';
+  groupMessages.forEach(m => {
+    let div = document.createElement('div');
+    div.classList.add('message', m.sender === currentUser ? 'own' : 'other');
+    div.innerHTML = `<div class="sender">${m.sender}</div>${m.text}<div class="meta">${m.time}</div>`;
+    win.appendChild(div);
+  });
 }
-function openGroupChat(){
-    document.getElementById("userMenu").classList.add("hidden");
-    document.getElementById("groupChatSection").classList.remove("hidden");
-    renderGroupChat();
+function sendGroupMessage() {
+  let txt = document.getElementById('groupMessage').value;
+  if (!txt) return;
+  let time = formatDate();
+  groupMessages.push({sender: currentUser, text: txt, time});
+  saveData();
+  document.getElementById('groupMessage').value = '';
+  renderGroup();
 }
-function renderGroupChat(){
-    let box=document.getElementById("groupChatBox");
-    box.innerHTML="";
-    groupChat.forEach(m=>{ box.innerHTML+=`<div class="msg"><span class="username">${m.user}:</span> ${m.text}</div>`; });
+function showSettings() {
+  document.getElementById('chatListScreen').classList.add('hidden');
+  document.getElementById('chatWindowScreen').classList.add('hidden');
+  document.getElementById('groupChatScreen').classList.add('hidden');
+  document.getElementById('settingsScreen').classList.remove('hidden');
 }
-function sendGroupMsg(){
-    let msg=document.getElementById("groupMsg").value.trim();
-    if(!msg)return;
-    groupChat.push({user:currentUser.name,text:msg});
-    saveAll();
-    renderGroupChat();
-    document.getElementById("groupMsg").value="";
+function logout() {
+  currentUser = null;
+  backToLogin();
 }
-function logout(){ currentUser=null; goBack(); }
+function toggleTheme() {
+  if (theme === 'dark') {
+    document.body.style.backgroundColor = '#fff';
+    document.body.style.color = '#000';
+    theme = 'light';
+  } else {
+    document.body.style.backgroundColor = '#000';
+    document.body.style.color = 'azure';
+    theme = 'dark';
+  }
+}
+function formatDate() {
+  let d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}/${d.getFullYear()}/${String(d.getHours()).padStart(2,'0')}/${String(d.getMinutes()).padStart(2,'0')}`;
+}
 </script>
-
 </body>
-</html>
+      </html>
+    
